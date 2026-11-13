@@ -6,7 +6,7 @@
 *{box-sizing:border-box}body{margin:0;font:15px/1.4 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--txt)}
 header{display:flex;align-items:center;gap:14px;padding:18px 28px;background:#111317;border-bottom:3px solid var(--acc)}
 header img{width:44px;height:44px}header h1{margin:0;font-size:22px;letter-spacing:.5px}header p{margin:0;color:var(--mut);font-size:13px}
-header a.gh{margin-left:auto;color:var(--txt);text-decoration:none;border:1px solid var(--line);padding:7px 14px;border-radius:4px}
+header a.gh:first-of-type{margin-left:auto}header a.gh{color:var(--txt);text-decoration:none;border:1px solid var(--line);padding:7px 14px;border-radius:4px}
 nav{display:flex;gap:4px;padding:0 28px;background:#111317;flex-wrap:wrap}nav button{background:none;border:0;color:var(--mut);padding:12px 16px;font:inherit;cursor:pointer;border-bottom:3px solid transparent}
 nav button.on{color:var(--txt);border-color:var(--acc)}main{padding:22px 28px;max-width:1300px}
 .bar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}.bar input[type=search]{flex:1;max-width:380px;padding:9px 12px;border-radius:4px;border:1px solid var(--line);background:var(--panel);color:var(--txt);font:inherit}
@@ -30,7 +30,7 @@ nav button.on{color:var(--txt);border-color:var(--acc)}main{padding:22px 28px;ma
 #hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
 </style></head><body>
 <header><img src="icons/roblox2017.ico" alt=""><div><h1>ROBLOX 2017 Launcher</h1><p>Classic toolbox models, places and icons</p></div>
-<a class="gh" href="https://github.com/jogresh7-ship-it/ROBLOX-2017">View on GitHub</a></header>
+<a class="gh" href="play.html" style="background:#e2231a;border-color:#e2231a">▶ Play</a><a class="gh" style="margin-left:8px" href="https://github.com/jogresh7-ship-it/ROBLOX-2017">View on GitHub</a></header>
 <nav><button data-t="models" class="on">Toolbox Models</button><button data-t="places">Places</button><button data-t="icons">Icons</button></nav>
 <main>
 <section id="models"><div class="bar"><input type="search" id="q" placeholder="Search models or IDs…"><span id="cnt">Loading models…</span></div>

@@ -7,6 +7,7 @@ Classic Roblox toolbox models, places and icons, with a website for viewing them
 - **Toolbox Models**: every model with a 3D preview. Click one to open the interactive viewer, which has a baseplate, a foliage slider, studs and auto-rotate. The viewer reads the original `.rbxm` files directly.
 - **Places**: explore place files (`.rbxl`) in 3D. The binary format is read by `rbxl.js`.
 - **Icons**: classic Roblox icons.
+- **Play** (`play.html`): make your own avatar (body colors, hat, face, name) and walk around the baseplate or a place. Use WASD or the arrow keys to move, Space to jump and R to respawn.
 
 To add a model, put it in `ToolboxModels/` and add its file name to the `FILES` list in `index.html`. To add a place, put it in `Places/` and add it to the `PLACES` list.
 
