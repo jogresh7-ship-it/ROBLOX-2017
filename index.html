@@ -31,19 +31,14 @@ nav button.on{color:var(--txt);border-color:var(--acc)}main{padding:22px 28px;ma
 </style></head><body>
 <header><img src="icons/roblox2017.ico" alt=""><div><h1>ROBLOX 2017 Launcher</h1><p>Classic toolbox models, places and icons</p></div>
 <a class="gh" href="https://github.com/jogresh7-ship-it/ROBLOX-2017">View on GitHub</a></header>
-<nav><button data-t="models" class="on">Toolbox Models</button><button data-t="places">Places</button><button data-t="icons">Icons</button><button data-t="tools">Desktop Launcher</button></nav>
+<nav><button data-t="models" class="on">Toolbox Models</button><button data-t="places">Places</button><button data-t="icons">Icons</button></nav>
 <main>
 <section id="models"><div class="bar"><input type="search" id="q" placeholder="Search models or IDs…"><span id="cnt">Loading models…</span></div>
 <p class="note">Click a model to view it in 3D. These are 2004–05 toolbox models: insert them into 2007–2008 Studio first, because modern Studio corrupts them.</p><div class="grid" id="mg"></div></section>
-<section id="places" class="hide"><div class="grid">
-<div class="card"><div class="id">164 KB</div><div class="n">Mobile</div><div class="btns"><a class="btn" href="Places/Mobile.rbxl" download>Download .rbxl</a></div></div></div>
-<p class="note" style="margin-top:14px">Place files use Roblox's binary format, so there's no in-browser preview. Open them in Roblox Studio.</p></section>
-<section id="icons" class="hide"><p class="note">Icons for the App Icon Replacer. Set one in <code>rohtmlconfig.json</code> or pick it in the desktop launcher.</p><div class="grid" id="ig"></div></section>
-<section id="tools" class="hide"><h2>Desktop launcher and icon replacer</h2><ol>
-<li><a href="https://github.com/jogresh7-ship-it/ROBLOX-2017/archive/refs/heads/main.zip" style="color:#ff6b63">Download everything (.zip)</a> and extract it.</li>
-<li>Install <a href="https://www.python.org/downloads/" style="color:#ff6b63">Python 3</a> on Windows.</li>
-<li>Run <code>python launcher.py</code> to browse models and places and to control the icon replacer.</li>
-<li>Or run <code>python rohtml_icon_replacer.py</code> on its own.</li></ol></section>
+<section id="places" class="hide"><div class="grid" id="plg"></div>
+<p class="note" style="margin-top:14px">Click a place to explore it in 3D. MeshParts and unions only store their outer size in the file, so they show as faint boxes.</p></section>
+<section id="icons" class="hide"><p class="note">Classic Roblox icons.</p><div class="grid" id="ig"></div></section>
+
 </main>
 
 <div id="viewer" class="hide"><div id="vbox">
@@ -61,6 +56,7 @@ nav button.on{color:var(--txt);border-color:var(--acc)}main{padding:22px 28px;ma
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {parseRbxBinary} from './rbxl.js';
 
 const ICONS=["RBLXSTUDIO","RCC","roblox2006","roblox2012","roblox2016","roblox2017","roblox2019","roblox2022","roldblox"];
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -106,20 +102,29 @@ const STUD=studTexture();
 function buildModel(model,studs){
   const grp=new THREE.Group();
   for(const p of model.parts){
+    if(p.t>=0.99)continue;
     const [sx,sy,sz]=p.s;
     const col=new THREE.Color(p.c[0],p.c[1],p.c[2]);
-    const mat=()=>new THREE.MeshLambertMaterial({color:col,transparent:p.t>0,opacity:1-p.t});
+    const ghost=p.cls==='MeshPart'||p.cls==='UnionOperation';const op=ghost?Math.min(1-p.t,.35):1-p.t;
+    const mat=()=>new THREE.MeshLambertMaterial({color:col,transparent:op<1,opacity:op,depthWrite:op>=1});
     let mesh;
     if(p.sh==='Ball'){mesh=new THREE.Mesh(new THREE.SphereGeometry(sx/2,32,20),mat());}
     else if(p.sh==='Cylinder'){const g=new THREE.CylinderGeometry(Math.min(sy,sz)/2,Math.min(sy,sz)/2,sx,32);g.rotateZ(Math.PI/2);mesh=new THREE.Mesh(g,mat());}
+    else if(p.sh==='Wedge'||p.sh==='CornerWedge'){
+      const x=sx/2,y=sy/2,z=sz/2,g=new THREE.BufferGeometry();
+      const v=p.sh==='Wedge'?[-x,-y,-z, x,-y,-z, x,-y,z, -x,-y,z, -x,y,z, x,y,z]:[-x,-y,-z, x,-y,-z, x,-y,z, -x,-y,z, x,y,-z];
+      const idx=p.sh==='Wedge'?[0,1,2,0,2,3, 3,2,5,3,5,4, 0,4,5,0,5,1, 0,3,4, 1,5,2]:[0,1,2,0,2,3, 1,4,2, 0,4,1, 2,4,3, 3,4,0];
+      g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(idx);g.computeVertexNormals();
+      mesh=new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:col,side:THREE.DoubleSide,transparent:p.t>0,opacity:1-p.t}));
+    }
     else{
-      const mats=[mat(),mat(),mat(),mat(),mat(),mat()];
+      const mats=[mat(),mat(),mat(),mat(),mat(),mat()];if(op<=0.01)continue;
       if(studs&&p.studs){const t=STUD.clone();t.repeat.set(sx,sz);t.needsUpdate=true;mats[2]=new THREE.MeshLambertMaterial({color:col,map:t,transparent:p.t>0,opacity:1-p.t});}
       mesh=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mats);
       if(p.sh==='Truss')mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),new THREE.LineBasicMaterial({color:0x222222})));
     }
     mesh.matrixAutoUpdate=false;mesh.matrix.copy(p.m);
-    mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry,30),new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.25})));
+    if(op>0.01)mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry,30),new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.25})));
     grp.add(mesh);
   }
   return grp;
@@ -186,9 +191,9 @@ function buildFoliage(size){
 function resetView(){const d=V.f.size*1.8+4;V.cam.position.set(d*.8,V.f.height/2+d*.5,d*.9);V.ctl.target.set(0,V.f.height/2,0);V.cam.far=Math.max(3000,d*20);V.cam.updateProjectionMatrix();V.ctl.update();}
 function show(model){
   if(!V)initViewer();current=model;
-  $('vtitle').textContent=model.name;$('vinfo').textContent=`#${model.id} · ${model.parts.length} parts · ${model.kb} KB`;$('vdl').href='ToolboxModels/'+encodeURIComponent(model.file);
+  $('vtitle').textContent=model.name;$('vinfo').textContent=(model.id?`#${model.id} · `:'')+`${model.parts.length} parts · ${model.kb} KB`;$('vdl').href=model.url||('ToolboxModels/'+encodeURIComponent(model.file));$('vdl').textContent='Download '+(model.url?'.rbxl':'.rbxm');
   if(V.model)V.scene.remove(V.model);V.model=buildModel(model,$('oStuds').checked);V.f=frame(V.model);V.scene.add(V.model);
-  buildGround();$('viewer').classList.remove('hide');resetView();
+  $('oGround').checked=!model.place;buildGround();$('viewer').classList.remove('hide');resetView();
 }
 $('vclose').onclick=()=>$('viewer').classList.add('hide');
 $('viewer').onclick=e=>{if(e.target.id==='viewer')$('viewer').classList.add('hide');};
@@ -199,6 +204,12 @@ $('oReset').onclick=()=>V&&resetView();
 
 // ---------- model grid ----------
 const mg=$('mg'),q=$('q');
+const PLACES=[{name:'Mobile',url:'Places/Mobile.rbxl'}];
+$('plg').innerHTML=PLACES.map((p,i)=>`<div class="card m" data-p="${i}"><img class="thumb" alt="" id="plt${i}"><div class="id" id="plc${i}">Loading…</div><div class="n">${esc(p.name)}</div><div class="btns"><button class="btn">View 3D</button><a class="btn sec" href="${p.url}" download onclick="event.stopPropagation()">Download</a></div></div>`).join('');
+PLACES.forEach((p,i)=>{p.place=true;p.loading=fetch(p.url).then(r=>r.arrayBuffer()).then(b=>{p.kb=(b.byteLength/1024).toFixed(0);
+  p.parts=parseRbxBinary(b).map(x=>({...x,m:new THREE.Matrix4().set(x.cf[3],x.cf[4],x.cf[5],x.cf[0],x.cf[6],x.cf[7],x.cf[8],x.cf[1],x.cf[9],x.cf[10],x.cf[11],x.cf[2],0,0,0,1)}));
+  $('plc'+i).textContent=p.parts.length+' parts';$('plt'+i).src=thumb(p);}).catch(e=>{$('plc'+i).textContent='Could not read: '+e.message;});});
+document.querySelectorAll('#plg .card').forEach(c=>c.onclick=()=>{const p=PLACES[+c.dataset.p];p.loading.then(()=>p.parts&&show(p));});
 const FILES=["770 Ball 4x4x4.rbxm", "771 Block 2x4x1.rbxm", "772 Block 2x4x1 no join.rbxm", "773 Block 2x4x1 hinged.rbxm", "774 Block 2x2x6.rbxm", "775 Block 4x8x1.rbxm", "776 Block 4x4x1 turntable.rbxm", "777 Ball 2x2x2.rbxm", "780 Vertical Motor - Controllable.rbxm", "781 Motorized Block Pair - Controllable.rbxm", "782 Motorized Block Pair - Controllable.rbxm", "783 Constant Velocity Motor Pair.rbxm", "784 Motorized Block - Controllable.rbxm", "788 Tree.rbxm", "789 Chassis.rbxm", "794 Dog.rbxm", "796 Skateboard.rbxm", "797 Skooter.rbxm", "801 Bouncy Chassis.rbxm", "802 Micro Chassis.rbxm", "805 Truck Chassis.rbxm", "807 Tank Chassis.rbxm", "808 The Hammer.rbxm", "809 Man on Scooter.rbxm", "810 Blue Figure on Scooter.rbxm", "813 Elevated Ramp.rbxm", "814 Tilted Ramp.rbxm", "818 Rotating Barrier.rbxm", "819 Push Through Barrier.rbxm", "820 100 Point Arch.rbxm", "825 House.rbxm", "826 Building.rbxm", "827 Chassis with Figure.rbxm", "828 Spasmotron.rbxm", "829 Wimpotron.rbxm", "830 Micro-troublemaker.rbxm", "832 Attacking Bug.rbxm", "833 Fleeing Bug.rbxm", "843 25 Point flag.rbxm", "851 Electron Canon - Mounted.rbxm", "852 Electron Cannon.rbxm", "853 Fragment Bomb.rbxm", "854 Crazy Railroad Gate.rbxm", "855 Spinner.rbxm", "856 Rotating Obstacle.rbxm", "857 Windmill Obstacle - Anchored.rbxm", "858 5 Second Jewel.rbxm", "859 Lose Game Beacon.rbxm", "860 Win Game Beacon.rbxm", "862 Man figure.rbxm", "863 Blue figure.rbxm", "864 Red Figure.rbxm"];
 MODELS=FILES.map(f=>{const m=f.match(/^(\d+)\s+(.*)\.rbxm$/);return{id:m[1],name:m[2],file:f,parts:[]};});
 mg.innerHTML=MODELS.map((m,i)=>`<div class="card m" data-i="${i}"><img class="thumb" alt="" data-i="${i}"><div class="id" id="pc${i}">#${m.id}</div><div class="n">${esc(m.name)}</div>
