@@ -92,7 +92,8 @@ export function parseRbxBinary(buf) {
       if (!col) { const b = BRICK[P.BrickColor?.[i]] || [163, 162, 165]; col = b.map(v => v / 255); }
       let sh = c.name === "WedgePart" ? "Wedge" : c.name === "CornerWedgePart" ? "CornerWedge" : c.name === "TrussPart" ? "Truss" : "Block";
       if (c.name === "Part" && P.shape) sh = SHAPES[P.shape[i]] || "Block";
-      parts.push({ cf: cf[i], s: size ? size[i] : [4, 1, 2], c: col, sh, t: P.Transparency?.[i] || 0, cls: c.name });
+      parts.push({ cf: cf[i], s: size ? size[i] : [4, 1, 2], c: col, sh, t: P.Transparency?.[i] || 0, cls: c.name,
+        top: P.TopSurface?.[i] ?? 0, bot: P.BottomSurface?.[i] ?? 0 });
     }
   }
   return parts;

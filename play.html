@@ -4,10 +4,10 @@
 <style>
 :root{--bg:#1b1d22;--panel:#25282f;--line:#343843;--txt:#e8e8ea;--mut:#9aa0ab;--acc:#e2231a}
 *{box-sizing:border-box}html,body{margin:0;height:100%;font:14px/1.4 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--txt);overflow:hidden}
-#top{position:fixed;top:0;left:0;right:0;height:44px;background:rgba(17,19,23,.92);display:flex;align-items:center;gap:8px;padding:0 12px;z-index:5;border-bottom:2px solid var(--acc)}
-#top b{font-size:16px;margin-right:10px}#top button,#top select{background:#2d313a;color:var(--txt);border:1px solid var(--line);border-radius:4px;padding:6px 12px;font:inherit;cursor:pointer}
-#top button.on{background:var(--acc);border-color:var(--acc)}#top a{color:var(--mut);margin-left:auto;text-decoration:none}
-#stage{position:fixed;inset:44px 0 0 0}#stage canvas{display:block;width:100%;height:100%}
+#top{position:fixed;top:0;left:0;right:0;height:44px;background:rgba(60,60,60,.55);backdrop-filter:blur(2px);display:flex;align-items:center;gap:8px;padding:0 12px;z-index:5}
+#top b{font-size:16px;margin-right:10px}#top button,#top select{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:6px 12px;font:inherit;cursor:pointer}
+#top button.on{background:var(--acc);border-color:var(--acc)}#top a{color:#ddd;margin-left:auto;text-decoration:none}
+#stage{position:fixed;inset:0}#stage canvas{display:block;width:100%;height:100%}
 #panel{position:fixed;top:56px;right:12px;width:300px;max-height:calc(100% - 70px);overflow:auto;background:rgba(37,40,47,.96);border:1px solid var(--line);border-radius:8px;padding:14px;z-index:4}
 #panel h3{margin:0 0 10px;font-size:15px}.row{display:flex;align-items:center;justify-content:space-between;margin:7px 0;gap:8px}
 .row label{color:var(--mut)}.sw{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 10px}.sw i{width:22px;height:22px;border-radius:3px;cursor:pointer;border:2px solid transparent}.sw i.on{border-color:#fff}
@@ -17,11 +17,18 @@ input[type=text]{background:#111317;border:1px solid var(--line);color:var(--txt
 #nametag{position:fixed;pointer-events:none;font-weight:700;text-shadow:0 1px 3px #000;transform:translate(-50%,-100%);z-index:3;white-space:nowrap}
 #loading{position:fixed;inset:44px 0 0 0;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(0,0,0,.4);z-index:6}
 .hide{display:none!important}
+#joy{position:fixed;left:24px;bottom:24px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.35);z-index:6;touch-action:none}
+#knob{position:absolute;left:40px;top:40px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.55)}
+#jump{position:fixed;right:28px;bottom:36px;width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.4);color:#fff;font:700 15px inherit;z-index:6;touch-action:none}
+body:not(.touch) #joy,body:not(.touch) #jump{display:none}
+body.touch #help{display:none}
+@media (max-width:700px){#top{gap:5px;padding:0 6px}#top b{display:none}#top a{font-size:12px}
+ #panel{top:auto;bottom:0;right:0;left:0;width:auto;max-height:45%;border-radius:12px 12px 0 0}}
 </style></head><body>
 <div id="top"><b>Classic Client</b>
 <button id="tAvatar" class="on">Avatar</button><button id="tPlay">Play</button>
 <select id="world"><option value="base">Baseplate</option><option value="Places/Mobile.rbxl">Mobile</option></select>
-<a href="./">← Back to models</a></div>
+<a href="./">← Back</a></div>
 <div id="stage"></div>
 <div id="nametag"></div>
 <div id="loading" class="hide">Loading world…</div>
@@ -35,6 +42,7 @@ input[type=text]{background:#111317;border:1px solid var(--line);color:var(--txt
 <div class="row" style="margin-top:14px"><button id="aRandom" class="seg" style="all:unset;cursor:pointer;color:#ff6b63">🎲 Randomize</button><button id="aReset" style="all:unset;cursor:pointer;color:var(--mut)">Reset</button></div>
 <p style="color:var(--mut);font-size:12px">Saved automatically in this browser.</p>
 </div>
+<div id="joy" class="hide"><div id="knob"></div></div><button id="jump" class="hide">JUMP</button>
 <div id="help" class="hide">WASD / arrows: move · Space: jump · Right-drag: turn camera · Scroll: zoom · R: respawn</div>
 
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
@@ -118,6 +126,13 @@ function studTex(n){const c=document.createElement('canvas');c.width=c.height=64
   g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.arc(34,34,17,0,7);g.fill();g.fillStyle='#fff';g.beginPath();g.arc(31,31,17,0,7);g.fill();g.strokeStyle='rgba(0,0,0,.12)';g.lineWidth=2;g.strokeRect(0,0,64,64);
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(n,n);t.colorSpace=THREE.SRGBColorSpace;return t;}
 
+function surfTex(kind){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,64,64);
+  if(kind==='studs'){g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.arc(34,35,16,0,7);g.fill();g.fillStyle='rgba(255,255,255,1)';g.beginPath();g.arc(31,31,16,0,7);g.fill();g.strokeStyle='rgba(0,0,0,.15)';g.lineWidth=2;g.beginPath();g.arc(31,31,16,0,7);g.stroke();}
+  else if(kind==='inlet'){g.fillStyle='rgba(0,0,0,.28)';g.beginPath();g.arc(32,32,16,0,7);g.fill();g.fillStyle='rgba(255,255,255,.6)';g.beginPath();g.arc(34,34,13,0,7);g.fill();}
+  else if(kind==='universal'){g.strokeStyle='rgba(0,0,0,.25)';g.lineWidth=5;g.strokeRect(14,14,36,36);}
+  g.strokeStyle='rgba(0,0,0,.1)';g.lineWidth=2;g.strokeRect(0,0,64,64);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t;}
+const SURF={3:surfTex('studs'),4:surfTex('inlet'),5:surfTex('universal')};
 let world=new THREE.Group(),colliders=[],spawn=new THREE.Vector3(0,0,0),killY=-200;scene.add(world);
 function baseplate(size=512,y=0){const m=new THREE.Mesh(new THREE.BoxGeometry(size,1,size),[0,1,2,3,4,5].map(i=>new THREE.MeshLambertMaterial({color:0x4b974b,map:i===2?studTex(size/4):null})));
   m.position.y=y-.5;m.receiveShadow=true;return m;}
@@ -128,7 +143,10 @@ function partMesh(p){
   else if(p.sh==='Cylinder'){g=new THREE.CylinderGeometry(Math.min(sy,sz)/2,Math.min(sy,sz)/2,sx,32);g.rotateZ(Math.PI/2);}
   else if(p.sh==='Wedge'){const x=sx/2,y=sy/2,z=sz/2;g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([-x,-y,-z,x,-y,-z,x,-y,z,-x,-y,z,-x,y,z,x,y,z],3));g.setIndex([0,1,2,0,2,3,3,2,5,3,5,4,0,4,5,0,5,1,0,3,4,1,5,2]);g.computeVertexNormals();}
   else g=new THREE.BoxGeometry(sx,sy,sz);
-  const m=new THREE.Mesh(g,M());if(p.sh==='Wedge')m.material.side=THREE.DoubleSide;
+  let mat=M();
+  if(p.sh==='Block'&&(SURF[p.top]||SURF[p.bot])){mat=[M(),M(),M(),M(),M(),M()];
+    for(const[face,k]of[[2,p.top],[3,p.bot]])if(SURF[k]){const t=SURF[k].clone();t.repeat.set(sx/2,sz/2);t.needsUpdate=true;mat[face]=new THREE.MeshLambertMaterial({color:col,map:t,transparent:op<1,opacity:op});}}
+  const m=new THREE.Mesh(g,mat);if(p.sh==='Wedge')m.material.side=THREE.DoubleSide;
   const cf=p.cf;m.matrixAutoUpdate=false;m.matrix.set(cf[3],cf[4],cf[5],cf[0],cf[6],cf[7],cf[8],cf[1],cf[9],cf[10],cf[11],cf[2],0,0,0,1);m.matrixWorldNeedsUpdate=true;
   m.castShadow=op>.5;m.receiveShadow=true;return m;
 }
@@ -157,6 +175,19 @@ async function loadWorld(src){
   $('loading').classList.add('hide');respawnChar(true);
 }
 
+
+// ---------------- touch controls (mobile) ----------------
+const isTouch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;if(isTouch)document.body.classList.add('touch');
+const joy={x:0,y:0};let jumpHeld=false;
+(()=>{const J=$('joy'),K=$('knob');let id=null,cx=0,cy=0;
+  J.addEventListener('pointerdown',e=>{id=e.pointerId;J.setPointerCapture(id);const r=J.getBoundingClientRect();cx=r.left+r.width/2;cy=r.top+r.height/2;mv(e);});
+  const mv=e=>{if(e.pointerId!==id)return;let dx=e.clientX-cx,dy=e.clientY-cy;const d=Math.hypot(dx,dy),m=50;if(d>m){dx*=m/d;dy*=m/d;}
+    K.style.transform=`translate(${dx}px,${dy}px)`;joy.x=dx/m;joy.y=-dy/m;};
+  J.addEventListener('pointermove',mv);
+  const up=e=>{if(e.pointerId!==id)return;id=null;joy.x=joy.y=0;K.style.transform='';};J.addEventListener('pointerup',up);J.addEventListener('pointercancel',up);
+  const jb=$('jump');jb.addEventListener('pointerdown',e=>{e.preventDefault();jumpHeld=true;});['pointerup','pointercancel','pointerleave'].forEach(t=>jb.addEventListener(t,()=>jumpHeld=false));
+})();
+
 // ---------------- player ----------------
 let char=null,pos=new THREE.Vector3(),vel=new THREE.Vector3(),yaw=0,onGround=false,walkT=0;
 function respawnChar(reset){
@@ -169,12 +200,12 @@ const keys={};addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')retur
 addEventListener('keyup',e=>keys[e.code]=false);
 const ray=new THREE.Raycaster();
 function step(dt){
-  const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
+  const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)+joy.y,s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+joy.x;
   const fwd=new THREE.Vector3();cam.getWorldDirection(fwd);fwd.y=0;fwd.normalize();const right=new THREE.Vector3().crossVectors(fwd,new THREE.Vector3(0,1,0));
-  const move=fwd.multiplyScalar(f).add(right.multiplyScalar(s));const moving=move.lengthSq()>0;
-  if(moving){move.normalize();const target=Math.atan2(move.x,move.z)+Math.PI;let d=target-yaw;d=Math.atan2(Math.sin(d),Math.cos(d));yaw+=d*Math.min(1,dt*12);}
+  const move=fwd.multiplyScalar(f).add(right.multiplyScalar(s));const moving=move.lengthSq()>0.01;
+  if(moving){if(move.length()>1)move.normalize();const target=Math.atan2(move.x,move.z)+Math.PI;let d=target-yaw;d=Math.atan2(Math.sin(d),Math.cos(d));yaw+=d*Math.min(1,dt*12);}
   vel.x=move.x*16;vel.z=move.z*16;vel.y-=196.2*dt*.5;
-  if(keys.Space&&onGround){vel.y=50;onGround=false;}
+  if((keys.Space||jumpHeld)&&onGround){vel.y=50;onGround=false;}
   // horizontal collision: cast at 3 heights in move direction
   const hv=new THREE.Vector3(vel.x,0,vel.z),hl=hv.length()*dt;
   if(hl>0){const dir=hv.clone().normalize();
@@ -208,6 +239,8 @@ let mode='avatar';
 function setMode(m){mode=m;$('tAvatar').classList.toggle('on',m==='avatar');$('tPlay').classList.toggle('on',m==='play');
   $('panel').classList.toggle('hide',m!=='avatar');$('help').classList.toggle('hide',m!=='play');
   orbit.mouseButtons={LEFT:m==='play'?null:THREE.MOUSE.ROTATE,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.ROTATE};orbit.enablePan=m!=='play';
+  orbit.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_ROTATE};
+  $('joy').classList.toggle('hide',m!=='play');$('jump').classList.toggle('hide',m!=='play');
   if(m==='avatar'){vel.set(0,0,0);yaw=0;char.rotation.y=0;orbit.target.set(pos.x,pos.y+3,pos.z);cam.position.set(pos.x+3,pos.y+5,pos.z-11);orbit.minDistance=4;orbit.maxDistance=40;}
   else{orbit.target.set(pos.x,pos.y+4.5,pos.z);cam.position.set(pos.x,pos.y+12,pos.z+20);orbit.minDistance=6;orbit.maxDistance=120;}
 }
@@ -219,7 +252,7 @@ const clock=new THREE.Clock(),tag=$('nametag');
   if(char){if(mode==='play')step(dt);else{char.rotation.y+=dt*.4;}}
   orbit.update();R3.render(scene,cam);
   if(char){const p=new THREE.Vector3(pos.x,pos.y+6.3,pos.z).project(cam);tag.style.display=p.z<1?'block':'none';
-    tag.style.left=((p.x+1)/2*host.clientWidth)+'px';tag.style.top=(44+(1-p.y)/2*host.clientHeight)+'px';}
+    tag.style.left=((p.x+1)/2*host.clientWidth)+'px';tag.style.top=((1-p.y)/2*host.clientHeight)+'px';}
 })();
 
 drawUI();await loadWorld('base');setMode('avatar');
