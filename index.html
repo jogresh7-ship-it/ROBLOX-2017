@@ -29,13 +29,12 @@ nav button.on{color:var(--txt);border-color:var(--acc)}main{padding:22px 28px;ma
 #vctl label{display:flex;align-items:center;gap:6px}#vctl input[type=range]{width:120px}
 #hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
 </style></head><body>
-<header><img src="icons/roblox2017.ico" alt=""><div><h1>ROBLOX 2017 Launcher</h1><p>Classic toolbox models, places and icons</p></div>
+<header><img src="icons/roblox2017.ico" alt=""><div><h1>ROBLOX 2017 Launcher</h1><p>Classic places and icons</p></div>
 <a class="gh" href="play.html" style="background:#e2231a;border-color:#e2231a">▶ Play</a><a class="gh" style="margin-left:8px" href="https://github.com/jogresh7-ship-it/ROBLOX-2017">View on GitHub</a></header>
-<nav><button data-t="models" class="on">Toolbox Models</button><button data-t="places">Places</button><button data-t="icons">Icons</button></nav>
+<nav><button data-t="places" class="on">Places</button><button data-t="icons">Icons</button></nav>
 <main>
-<section id="models"><div class="bar"><input type="search" id="q" placeholder="Search models or IDs…"><span id="cnt">Loading models…</span></div>
-<p class="note">Click a model to view it in 3D. These are 2004–05 toolbox models: insert them into 2007–2008 Studio first, because modern Studio corrupts them.</p><div class="grid" id="mg"></div></section>
-<section id="places" class="hide"><div class="grid" id="plg"></div>
+
+<section id="places"><div class="grid" id="plg"></div>
 <p class="note" style="margin-top:14px">Click a place to explore it in 3D. MeshParts and unions only store their outer size in the file, so they show as faint boxes.</p></section>
 <section id="icons" class="hide"><p class="note">Classic Roblox icons.</p><div class="grid" id="ig"></div></section>
 
@@ -203,22 +202,11 @@ $('oStuds').onchange=()=>current&&show(current);
 $('oReset').onclick=()=>V&&resetView();
 
 // ---------- model grid ----------
-const mg=$('mg'),q=$('q');
+
 const PLACES=[{name:'Mobile',url:'Places/Mobile.rbxl'}];
 $('plg').innerHTML=PLACES.map((p,i)=>`<div class="card m" data-p="${i}"><img class="thumb" alt="" id="plt${i}"><div class="id" id="plc${i}">Loading…</div><div class="n">${esc(p.name)}</div><div class="btns"><button class="btn">View 3D</button><a class="btn sec" href="${p.url}" download onclick="event.stopPropagation()">Download</a></div></div>`).join('');
 PLACES.forEach((p,i)=>{p.place=true;p.loading=fetch(p.url).then(r=>r.arrayBuffer()).then(b=>{p.kb=(b.byteLength/1024).toFixed(0);
   p.parts=parseRbxBinary(b).map(x=>({...x,m:new THREE.Matrix4().set(x.cf[3],x.cf[4],x.cf[5],x.cf[0],x.cf[6],x.cf[7],x.cf[8],x.cf[1],x.cf[9],x.cf[10],x.cf[11],x.cf[2],0,0,0,1)}));
   $('plc'+i).textContent=p.parts.length+' parts';$('plt'+i).src=thumb(p);}).catch(e=>{$('plc'+i).textContent='Could not read: '+e.message;});});
 document.querySelectorAll('#plg .card').forEach(c=>c.onclick=()=>{const p=PLACES[+c.dataset.p];p.loading.then(()=>p.parts&&show(p));});
-const FILES=["770 Ball 4x4x4.rbxm", "771 Block 2x4x1.rbxm", "772 Block 2x4x1 no join.rbxm", "773 Block 2x4x1 hinged.rbxm", "774 Block 2x2x6.rbxm", "775 Block 4x8x1.rbxm", "776 Block 4x4x1 turntable.rbxm", "777 Ball 2x2x2.rbxm", "780 Vertical Motor - Controllable.rbxm", "781 Motorized Block Pair - Controllable.rbxm", "782 Motorized Block Pair - Controllable.rbxm", "783 Constant Velocity Motor Pair.rbxm", "784 Motorized Block - Controllable.rbxm", "788 Tree.rbxm", "789 Chassis.rbxm", "794 Dog.rbxm", "796 Skateboard.rbxm", "797 Skooter.rbxm", "801 Bouncy Chassis.rbxm", "802 Micro Chassis.rbxm", "805 Truck Chassis.rbxm", "807 Tank Chassis.rbxm", "808 The Hammer.rbxm", "809 Man on Scooter.rbxm", "810 Blue Figure on Scooter.rbxm", "813 Elevated Ramp.rbxm", "814 Tilted Ramp.rbxm", "818 Rotating Barrier.rbxm", "819 Push Through Barrier.rbxm", "820 100 Point Arch.rbxm", "825 House.rbxm", "826 Building.rbxm", "827 Chassis with Figure.rbxm", "828 Spasmotron.rbxm", "829 Wimpotron.rbxm", "830 Micro-troublemaker.rbxm", "832 Attacking Bug.rbxm", "833 Fleeing Bug.rbxm", "843 25 Point flag.rbxm", "851 Electron Canon - Mounted.rbxm", "852 Electron Cannon.rbxm", "853 Fragment Bomb.rbxm", "854 Crazy Railroad Gate.rbxm", "855 Spinner.rbxm", "856 Rotating Obstacle.rbxm", "857 Windmill Obstacle - Anchored.rbxm", "858 5 Second Jewel.rbxm", "859 Lose Game Beacon.rbxm", "860 Win Game Beacon.rbxm", "862 Man figure.rbxm", "863 Blue figure.rbxm", "864 Red Figure.rbxm"];
-MODELS=FILES.map(f=>{const m=f.match(/^(\d+)\s+(.*)\.rbxm$/);return{id:m[1],name:m[2],file:f,parts:[]};});
-mg.innerHTML=MODELS.map((m,i)=>`<div class="card m" data-i="${i}"><img class="thumb" alt="" data-i="${i}"><div class="id" id="pc${i}">#${m.id}</div><div class="n">${esc(m.name)}</div>
-  <div class="btns"><button class="btn">View 3D</button><a class="btn sec" href="ToolboxModels/${encodeURIComponent(m.file)}" download onclick="event.stopPropagation()">Download</a></div></div>`).join('');
-mg.querySelectorAll('.card').forEach(c=>c.onclick=()=>{const m=MODELS[+c.dataset.i];m.loaded?show(m):m.loading.then(()=>show(m));});
-const draw=()=>{const s=q.value.toLowerCase();let k=0;mg.querySelectorAll('.card').forEach(c=>{const m=MODELS[+c.dataset.i];const ok=(m.id+' '+m.name).toLowerCase().includes(s);c.classList.toggle('hide',!ok);k+=ok;});$('cnt').textContent=k+' of '+MODELS.length;};
-q.oninput=draw;draw();
-(async()=>{for(const [i,m] of MODELS.entries()){
-  m.loading=fetch('ToolboxModels/'+encodeURIComponent(m.file)).then(r=>r.text()).then(t=>{m.parts=parseRbxm(t);m.kb=(t.length/1024).toFixed(1);m.loaded=true;});
-  try{await m.loading;$('pc'+i).textContent=`#${m.id} · ${m.parts.length} parts`;mg.querySelector(`img[data-i="${i}"]`).src=thumb(m);}catch(e){$('pc'+i).textContent=`#${m.id} · could not read file`;}
-}})();
 </script></body></html>
