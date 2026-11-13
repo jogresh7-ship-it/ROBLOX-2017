@@ -2,6 +2,14 @@
 
 A small Windows tray tool (ROHTML App Icon Replacer) that swaps the Roblox window's title and taskbar icon for a classic one. It defaults to the **2017** icon.
 
+## Launcher
+Run `python launcher.py` (Windows). It has three tabs:
+- **Toolbox Models**: search all 52 models and double-click one to open it in Studio.
+- **Places**: open the place files.
+- **Icon Replacer**: pick an icon with a preview, set the window title, and start or stop the replacer.
+
+The icon preview uses Pillow (`pip install Pillow`).
+
 ## Usage
 1. Install Python 3 on Windows.
 2. Run `python rohtml_icon_replacer.py`. Missing dependencies (psutil, pystray, Pillow, pywin32) are installed automatically.
