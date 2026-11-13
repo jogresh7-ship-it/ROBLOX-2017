@@ -22,3 +22,6 @@ pip install pyinstaller
 pyinstaller --onefile --noconsole --icon icons/roblox2017.ico rohtml_icon_replacer.py
 ```
 Put the resulting exe next to `rohtmlconfig.json` and the `icons/` folder.
+
+## ToolboxModels
+The `ToolboxModels/` folder holds the 2004–05 Roblox toolbox models (.rbxm), from Block 2x4x1 to Red Figure. They were originally collected by Client Search. See `ToolboxModels/README.md` for history and notes. Insert them into an older Studio version (2007–2008) first, because they get corrupted in modern Studio.
