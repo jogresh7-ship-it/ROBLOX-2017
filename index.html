@@ -7,24 +7,37 @@
 header{display:flex;align-items:center;gap:14px;padding:18px 28px;background:#111317;border-bottom:3px solid var(--acc)}
 header img{width:44px;height:44px}header h1{margin:0;font-size:22px;letter-spacing:.5px}header p{margin:0;color:var(--mut);font-size:13px}
 header a.gh{margin-left:auto;color:var(--txt);text-decoration:none;border:1px solid var(--line);padding:7px 14px;border-radius:4px}
-nav{display:flex;gap:4px;padding:0 28px;background:#111317}nav button{background:none;border:0;color:var(--mut);padding:12px 16px;font:inherit;cursor:pointer;border-bottom:3px solid transparent}
-nav button.on{color:var(--txt);border-color:var(--acc)}main{padding:22px 28px;max-width:1200px}
-.bar{display:flex;gap:12px;align-items:center;margin-bottom:16px}.bar input{flex:1;max-width:380px;padding:9px 12px;border-radius:4px;border:1px solid var(--line);background:var(--panel);color:var(--txt);font:inherit}
-.bar span{color:var(--mut);font-size:13px}.note{color:var(--mut);font-size:13px;margin:0 0 16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:8px}
+nav{display:flex;gap:4px;padding:0 28px;background:#111317;flex-wrap:wrap}nav button{background:none;border:0;color:var(--mut);padding:12px 16px;font:inherit;cursor:pointer;border-bottom:3px solid transparent}
+nav button.on{color:var(--txt);border-color:var(--acc)}main{padding:22px 28px;max-width:1300px}
+.bar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}.bar input[type=search]{flex:1;max-width:380px;padding:9px 12px;border-radius:4px;border:1px solid var(--line);background:var(--panel);color:var(--txt);font:inherit}
+.bar span,.note{color:var(--mut);font-size:13px}.note{margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.card.m{cursor:pointer;transition:border-color .15s}.card.m:hover{border-color:var(--acc)}
+.thumb{width:100%;aspect-ratio:4/3;border-radius:4px;background:#7fb2e5;object-fit:cover}
 .card .id{font-size:12px;color:var(--mut);font-family:Consolas,monospace}.card .n{font-weight:600}
-.card a{margin-top:auto;align-self:flex-start;background:var(--acc);color:#fff;text-decoration:none;padding:6px 12px;border-radius:4px;font-size:13px}
-.card a:hover{filter:brightness(1.15)}.ic{align-items:center;text-align:center}.ic img{width:64px;height:64px;image-rendering:auto}
-.hide{display:none}code{background:#111317;padding:2px 6px;border-radius:3px}ol li{margin:6px 0}
+.btn{align-self:flex-start;background:var(--acc);color:#fff;text-decoration:none;padding:6px 12px;border-radius:4px;font-size:13px;border:0;cursor:pointer;font-family:inherit}
+.btn.sec{background:#3a3f4b}.btn:hover{filter:brightness(1.15)}.card .btns{display:flex;gap:6px;margin-top:auto}
+.ic{align-items:center;text-align:center}.ic img{width:64px;height:64px}
+.hide{display:none!important}code{background:#111317;padding:2px 6px;border-radius:3px}ol li{margin:6px 0}
+#viewer{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:10}
+#vbox{background:var(--panel);border:1px solid var(--line);border-radius:8px;width:min(1100px,96vw);height:min(760px,92vh);display:flex;flex-direction:column;overflow:hidden}
+#vhead{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+#vhead h2{margin:0;font-size:17px}#vhead .x{margin-left:auto;background:none;border:0;color:var(--txt);font-size:22px;cursor:pointer}
+#vcanvas{flex:1;position:relative}#vcanvas canvas{display:block;width:100%;height:100%}
+#vctl{display:flex;gap:16px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);font-size:13px;color:var(--mut);flex-wrap:wrap}
+#vctl label{display:flex;align-items:center;gap:6px}#vctl input[type=range]{width:120px}
+#hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
 </style></head><body>
 <header><img src="icons/roblox2017.ico" alt=""><div><h1>ROBLOX 2017 Launcher</h1><p>Classic toolbox models, places and icons</p></div>
 <a class="gh" href="https://github.com/jogresh7-ship-it/ROBLOX-2017">View on GitHub</a></header>
 <nav><button data-t="models" class="on">Toolbox Models</button><button data-t="places">Places</button><button data-t="icons">Icons</button><button data-t="tools">Desktop Launcher</button></nav>
 <main>
-<section id="models"><div class="bar"><input id="q" placeholder="Search models or IDs…"><span id="cnt"></span></div>
-<p class="note">2004–05 toolbox models. Insert them into 2007–2008 Studio first, because modern Studio corrupts them.</p><div class="grid" id="mg"></div></section>
-<section id="places" class="hide"><div class="grid" id="pg"></div></section>
+<section id="models"><div class="bar"><input type="search" id="q" placeholder="Search models or IDs…"><span id="cnt">Loading models…</span></div>
+<p class="note">Click a model to view it in 3D. These are 2004–05 toolbox models: insert them into 2007–2008 Studio first, because modern Studio corrupts them.</p><div class="grid" id="mg"></div></section>
+<section id="places" class="hide"><div class="grid">
+<div class="card"><div class="id">164 KB</div><div class="n">Mobile</div><div class="btns"><a class="btn" href="Places/Mobile.rbxl" download>Download .rbxl</a></div></div></div>
+<p class="note" style="margin-top:14px">Place files use Roblox's binary format, so there's no in-browser preview. Open them in Roblox Studio.</p></section>
 <section id="icons" class="hide"><p class="note">Icons for the App Icon Replacer. Set one in <code>rohtmlconfig.json</code> or pick it in the desktop launcher.</p><div class="grid" id="ig"></div></section>
 <section id="tools" class="hide"><h2>Desktop launcher and icon replacer</h2><ol>
 <li><a href="https://github.com/jogresh7-ship-it/ROBLOX-2017/archive/refs/heads/main.zip" style="color:#ff6b63">Download everything (.zip)</a> and extract it.</li>
@@ -32,15 +45,143 @@ nav button.on{color:var(--txt);border-color:var(--acc)}main{padding:22px 28px;ma
 <li>Run <code>python launcher.py</code> to browse models and places and to control the icon replacer.</li>
 <li>Or run <code>python rohtml_icon_replacer.py</code> on its own.</li></ol></section>
 </main>
-<script>
-const D={"models": [{"id": "770", "name": "Ball 4x4x4", "url": "ToolboxModels/770%20Ball%204x4x4.rbxm", "kb": 2.2}, {"id": "771", "name": "Block 2x4x1", "url": "ToolboxModels/771%20Block%202x4x1.rbxm", "kb": 3.0}, {"id": "772", "name": "Block 2x4x1 no join", "url": "ToolboxModels/772%20Block%202x4x1%20no%20join.rbxm", "kb": 3.0}, {"id": "773", "name": "Block 2x4x1 hinged", "url": "ToolboxModels/773%20Block%202x4x1%20hinged.rbxm", "kb": 2.9}, {"id": "774", "name": "Block 2x2x6", "url": "ToolboxModels/774%20Block%202x2x6.rbxm", "kb": 3.0}, {"id": "775", "name": "Block 4x8x1", "url": "ToolboxModels/775%20Block%204x8x1.rbxm", "kb": 3.0}, {"id": "776", "name": "Block 4x4x1 turntable", "url": "ToolboxModels/776%20Block%204x4x1%20turntable.rbxm", "kb": 3.0}, {"id": "777", "name": "Ball 2x2x2", "url": "ToolboxModels/777%20Ball%202x2x2.rbxm", "kb": 3.0}, {"id": "780", "name": "Vertical Motor - Controllable", "url": "ToolboxModels/780%20Vertical%20Motor%20-%20Controllable.rbxm", "kb": 4.5}, {"id": "781", "name": "Motorized Block Pair - Controllable", "url": "ToolboxModels/781%20Motorized%20Block%20Pair%20-%20Controllable.rbxm", "kb": 8.2}, {"id": "782", "name": "Motorized Block Pair - Controllable", "url": "ToolboxModels/782%20Motorized%20Block%20Pair%20-%20Controllable.rbxm", "kb": 11.0}, {"id": "783", "name": "Constant Velocity Motor Pair", "url": "ToolboxModels/783%20Constant%20Velocity%20Motor%20Pair.rbxm", "kb": 8.1}, {"id": "784", "name": "Motorized Block - Controllable", "url": "ToolboxModels/784%20Motorized%20Block%20-%20Controllable.rbxm", "kb": 4.6}, {"id": "788", "name": "Tree", "url": "ToolboxModels/788%20Tree.rbxm", "kb": 10.3}, {"id": "789", "name": "Chassis", "url": "ToolboxModels/789%20Chassis.rbxm", "kb": 19.1}, {"id": "794", "name": "Dog", "url": "ToolboxModels/794%20Dog.rbxm", "kb": 49.6}, {"id": "796", "name": "Skateboard", "url": "ToolboxModels/796%20Skateboard.rbxm", "kb": 15.1}, {"id": "797", "name": "Skooter", "url": "ToolboxModels/797%20Skooter.rbxm", "kb": 20.7}, {"id": "801", "name": "Bouncy Chassis", "url": "ToolboxModels/801%20Bouncy%20Chassis.rbxm", "kb": 28.3}, {"id": "802", "name": "Micro Chassis", "url": "ToolboxModels/802%20Micro%20Chassis.rbxm", "kb": 20.7}, {"id": "805", "name": "Truck Chassis", "url": "ToolboxModels/805%20Truck%20Chassis.rbxm", "kb": 36.8}, {"id": "807", "name": "Tank Chassis", "url": "ToolboxModels/807%20Tank%20Chassis.rbxm", "kb": 26.4}, {"id": "808", "name": "The Hammer", "url": "ToolboxModels/808%20The%20Hammer.rbxm", "kb": 63.2}, {"id": "809", "name": "Man on Scooter", "url": "ToolboxModels/809%20Man%20on%20Scooter.rbxm", "kb": 61.1}, {"id": "810", "name": "Blue Figure on Scooter", "url": "ToolboxModels/810%20Blue%20Figure%20on%20Scooter.rbxm", "kb": 38.3}, {"id": "813", "name": "Elevated Ramp", "url": "ToolboxModels/813%20Elevated%20Ramp.rbxm", "kb": 23.8}, {"id": "814", "name": "Tilted Ramp", "url": "ToolboxModels/814%20Tilted%20Ramp.rbxm", "kb": 24.2}, {"id": "818", "name": "Rotating Barrier", "url": "ToolboxModels/818%20Rotating%20Barrier.rbxm", "kb": 27.5}, {"id": "819", "name": "Push Through Barrier", "url": "ToolboxModels/819%20Push%20Through%20Barrier.rbxm", "kb": 25.5}, {"id": "820", "name": "100 Point Arch", "url": "ToolboxModels/820%20100%20Point%20Arch.rbxm", "kb": 14.2}, {"id": "825", "name": "House", "url": "ToolboxModels/825%20House.rbxm", "kb": 49.5}, {"id": "826", "name": "Building", "url": "ToolboxModels/826%20Building.rbxm", "kb": 95.5}, {"id": "827", "name": "Chassis with Figure", "url": "ToolboxModels/827%20Chassis%20with%20Figure.rbxm", "kb": 41.1}, {"id": "828", "name": "Spasmotron", "url": "ToolboxModels/828%20Spasmotron.rbxm", "kb": 37.3}, {"id": "829", "name": "Wimpotron", "url": "ToolboxModels/829%20Wimpotron.rbxm", "kb": 44.3}, {"id": "830", "name": "Micro-troublemaker", "url": "ToolboxModels/830%20Micro-troublemaker.rbxm", "kb": 8.1}, {"id": "832", "name": "Attacking Bug", "url": "ToolboxModels/832%20Attacking%20Bug.rbxm", "kb": 21.5}, {"id": "833", "name": "Fleeing Bug", "url": "ToolboxModels/833%20Fleeing%20Bug.rbxm", "kb": 21.5}, {"id": "843", "name": "25 Point flag", "url": "ToolboxModels/843%2025%20Point%20flag.rbxm", "kb": 7.1}, {"id": "851", "name": "Electron Canon - Mounted", "url": "ToolboxModels/851%20Electron%20Canon%20-%20Mounted.rbxm", "kb": 17.2}, {"id": "852", "name": "Electron Cannon", "url": "ToolboxModels/852%20Electron%20Cannon.rbxm", "kb": 12.7}, {"id": "853", "name": "Fragment Bomb", "url": "ToolboxModels/853%20Fragment%20Bomb.rbxm", "kb": 115.3}, {"id": "854", "name": "Crazy Railroad Gate", "url": "ToolboxModels/854%20Crazy%20Railroad%20Gate.rbxm", "kb": 12.3}, {"id": "855", "name": "Spinner", "url": "ToolboxModels/855%20Spinner.rbxm", "kb": 41.4}, {"id": "856", "name": "Rotating Obstacle", "url": "ToolboxModels/856%20Rotating%20Obstacle.rbxm", "kb": 13.6}, {"id": "857", "name": "Windmill Obstacle - Anchored", "url": "ToolboxModels/857%20Windmill%20Obstacle%20-%20Anchored.rbxm", "kb": 12.3}, {"id": "858", "name": "5 Second Jewel", "url": "ToolboxModels/858%205%20Second%20Jewel.rbxm", "kb": 3.4}, {"id": "859", "name": "Lose Game Beacon", "url": "ToolboxModels/859%20Lose%20Game%20Beacon.rbxm", "kb": 3.4}, {"id": "860", "name": "Win Game Beacon", "url": "ToolboxModels/860%20Win%20Game%20Beacon.rbxm", "kb": 3.4}, {"id": "862", "name": "Man figure", "url": "ToolboxModels/862%20Man%20figure.rbxm", "kb": 43.6}, {"id": "863", "name": "Blue figure", "url": "ToolboxModels/863%20Blue%20figure.rbxm", "kb": 21.3}, {"id": "864", "name": "Red Figure", "url": "ToolboxModels/864%20Red%20Figure.rbxm", "kb": 21.3}], "places": [{"name": "Mobile", "url": "Places/Mobile.rbxl", "kb": 158}], "icons": [{"name": "RBLXSTUDIO", "url": "icons/RBLXSTUDIO.ico"}, {"name": "RCC", "url": "icons/RCC.ico"}, {"name": "minecraft", "url": "icons/minecraft.ico"}, {"name": "pictures", "url": "icons/pictures.ico"}, {"name": "roblox2006", "url": "icons/roblox2006.ico"}, {"name": "roblox2012", "url": "icons/roblox2012.ico"}, {"name": "roblox2016", "url": "icons/roblox2016.ico"}, {"name": "roblox2017", "url": "icons/roblox2017.ico"}, {"name": "roblox2019", "url": "icons/roblox2019.ico"}, {"name": "roblox2022", "url": "icons/roblox2022.ico"}, {"name": "roldblox", "url": "icons/roldblox.ico"}]};
+
+<div id="viewer" class="hide"><div id="vbox">
+<div id="vhead"><h2 id="vtitle"></h2><span class="note" id="vinfo" style="margin:0"></span><a class="btn" id="vdl" download>Download .rbxm</a><button class="x" id="vclose" aria-label="Close">×</button></div>
+<div id="vcanvas"><div id="hint">Drag to rotate · right-drag to pan · scroll to zoom</div></div>
+<div id="vctl">
+<label><input type="checkbox" id="oGround" checked> Baseplate</label>
+<label>Foliage <input type="range" id="oFol" min="0" max="300" value="60"> <span id="vFol">60</span></label>
+<label><input type="checkbox" id="oStuds" checked> Studs</label>
+<label><input type="checkbox" id="oSpin"> Auto-rotate</label>
+<button class="btn sec" id="oReset">Reset view</button>
+</div></div></div>
+
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const ICONS=["RBLXSTUDIO","RCC","minecraft","pictures","roblox2006","roblox2012","roblox2016","roblox2017","roblox2019","roblox2022","roldblox"];
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const mg=document.getElementById('mg'),q=document.getElementById('q'),cnt=document.getElementById('cnt');
-function drawModels(){const s=q.value.toLowerCase();const L=D.models.filter(m=>(m.id+' '+m.name).toLowerCase().includes(s));
-mg.innerHTML=L.map(m=>`<div class="card"><div class="id">#${m.id} · ${m.kb} KB</div><div class="n">${esc(m.name)}</div><a href="${m.url}" download>Download .rbxm</a></div>`).join('');cnt.textContent=L.length+' of '+D.models.length;}
-q.oninput=drawModels;drawModels();
-document.getElementById('pg').innerHTML=D.places.map(p=>`<div class="card"><div class="id">${p.kb} KB</div><div class="n">${esc(p.name)}</div><a href="${p.url}" download>Download .rbxl</a></div>`).join('');
-document.getElementById('ig').innerHTML=D.icons.map(i=>`<div class="card ic"><img src="${i.url}" alt=""><div class="n">${esc(i.name)}</div><a href="${i.url}" download>Download</a></div>`).join('');
+const $=id=>document.getElementById(id);
+
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
-document.querySelectorAll('main section').forEach(s=>s.classList.toggle('hide',s.id!==b.dataset.t));});
+  document.querySelectorAll('main section').forEach(s=>s.classList.toggle('hide',s.id!==b.dataset.t));});
+$('ig').innerHTML=ICONS.map(i=>`<div class="card ic"><img src="icons/${i}.ico" alt=""><div class="n">${i}</div><a class="btn" href="icons/${i}.ico" download>Download</a></div>`).join('');
+
+// ---------- shared scene building ----------
+function studTexture(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
+  g.fillStyle='#fff';g.fillRect(0,0,64,64);g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.arc(34,34,17,0,7);g.fill();
+  g.fillStyle='#fff';g.beginPath();g.arc(31,31,17,0,7);g.fill();g.strokeStyle='rgba(0,0,0,.12)';g.lineWidth=2;g.strokeRect(0,0,64,64);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t;}
+const STUD=studTexture();
+
+function buildModel(model,studs){
+  const grp=new THREE.Group();
+  for(const p of model.parts){
+    const [x,y,z,r00,r01,r02,r10,r11,r12,r20,r21,r22]=p.cf,[sx,sy,sz]=p.s;
+    const col=new THREE.Color(p.c[0],p.c[1],p.c[2]);
+    const mat=()=>new THREE.MeshLambertMaterial({color:col,transparent:p.t>0,opacity:1-p.t});
+    let mesh;
+    if(p.sh==='Ball'){mesh=new THREE.Mesh(new THREE.SphereGeometry(sx/2,32,20),mat());}
+    else if(p.sh==='Cylinder'){const g=new THREE.CylinderGeometry(Math.min(sy,sz)/2,Math.min(sy,sz)/2,sx,32);g.rotateZ(Math.PI/2);mesh=new THREE.Mesh(g,mat());}
+    else{
+      const mats=[mat(),mat(),mat(),mat(),mat(),mat()];
+      if(studs&&p.studs){const t=STUD.clone();t.repeat.set(sx,sz);t.needsUpdate=true;mats[2]=new THREE.MeshLambertMaterial({color:col,map:t,transparent:p.t>0,opacity:1-p.t});}
+      mesh=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mats);
+      if(p.sh==='Truss')mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),new THREE.LineBasicMaterial({color:0x222222})));
+    }
+    const m=new THREE.Matrix4().set(r00,r01,r02,x, r10,r11,r12,y, r20,r21,r22,z, 0,0,0,1);
+    mesh.matrixAutoUpdate=false;mesh.matrix.copy(m);
+    mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry,30),new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.25})));
+    grp.add(mesh);
+  }
+  return grp;
+}
+
+function lights(scene){scene.add(new THREE.HemisphereLight(0xffffff,0x667755,1.4));const d=new THREE.DirectionalLight(0xffffff,1.6);d.position.set(30,60,40);scene.add(d);}
+function frame(grp){
+  grp.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(grp);
+  if(box.isEmpty())box.set(new THREE.Vector3(-2,-2,-2),new THREE.Vector3(2,2,2));
+  const c=box.getCenter(new THREE.Vector3()),s=box.getSize(new THREE.Vector3());
+  grp.position.set(-c.x,-box.min.y+0.0,-c.z); // sit on y=0
+  return {size:Math.max(s.x,s.y,s.z,2),height:s.y};
+}
+
+// ---------- thumbnails ----------
+const tr=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});tr.setSize(320,240);tr.outputColorSpace=THREE.SRGBColorSpace;
+function thumb(model){
+  const sc=new THREE.Scene();sc.background=new THREE.Color(0x7fb2e5);lights(sc);
+  const g=buildModel(model,true);const f=frame(g);sc.add(g);
+  const gp=new THREE.Mesh(new THREE.PlaneGeometry(400,400),new THREE.MeshLambertMaterial({color:0x4b974b}));gp.rotation.x=-Math.PI/2;gp.position.y=-.01;sc.add(gp);
+  const cam=new THREE.PerspectiveCamera(40,4/3,.1,2000);const d=f.size*1.9;cam.position.set(d*.8,f.height/2+d*.55,d*.9);cam.lookAt(0,f.height/2,0);
+  tr.render(sc,cam);const url=tr.domElement.toDataURL('image/jpeg',.85);
+  sc.traverse(o=>{o.geometry?.dispose();});return url;
+}
+
+// ---------- viewer ----------
+let V=null,MODELS=[],current=null;
+function initViewer(){
+  const host=$('vcanvas');const r=new THREE.WebGLRenderer({antialias:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.outputColorSpace=THREE.SRGBColorSpace;
+  host.prepend(r.domElement);
+  const scene=new THREE.Scene();scene.background=new THREE.Color(0x7fb2e5);scene.fog=new THREE.Fog(0x7fb2e5,200,600);lights(scene);
+  const cam=new THREE.PerspectiveCamera(45,1,.1,3000);const ctl=new OrbitControls(cam,r.domElement);ctl.enableDamping=true;
+  const ground=new THREE.Group();scene.add(ground);
+  V={r,scene,cam,ctl,ground,model:null,fol:null,f:null};
+  const resize=()=>{const w=host.clientWidth,h=host.clientHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();};
+  new ResizeObserver(resize).observe(host);resize();
+  (function loop(){requestAnimationFrame(loop);if($('viewer').classList.contains('hide'))return;ctl.autoRotate=$('oSpin').checked;ctl.update();r.render(scene,cam);})();
+}
+function buildGround(){
+  V.ground.clear();if(!$('oGround').checked)return;
+  const size=Math.max(128,Math.ceil(V.f.size*6/4)*4);
+  const t=STUD.clone();t.repeat.set(size/4,size/4);t.needsUpdate=true; // 4-stud grass tiles look closer to classic baseplate scale
+  const bp=new THREE.Mesh(new THREE.BoxGeometry(size,1,size),[0,1,2,3,4,5].map(i=>new THREE.MeshLambertMaterial({color:0x4b974b,map:i===2&&$('oStuds').checked?t:null})));
+  bp.position.y=-.5;V.ground.add(bp);
+  buildFoliage(size);
+}
+function rng(seed){return()=>((seed=Math.imul(seed^seed>>>15,seed|1)+0x6D2B79F5|0)>>>0)/4294967296;}
+function buildFoliage(size){
+  const n=+$('oFol').value;$('vFol').textContent=n;if(!n)return;
+  const R=rng(1337),keep=V.f.size*.8+4,half=size/2-3;
+  const trunkG=new THREE.CylinderGeometry(.5,.6,1,8),leafG=new THREE.ConeGeometry(1,1,8),bushG=new THREE.SphereGeometry(1,10,8),grassG=new THREE.ConeGeometry(.15,1,4);
+  const trunkM=new THREE.MeshLambertMaterial({color:0x6b4a2b}),leafM=new THREE.MeshLambertMaterial({color:0x2f7a33}),bushM=new THREE.MeshLambertMaterial({color:0x3c8f3a}),grassM=new THREE.MeshLambertMaterial({color:0x5fae4f});
+  const trees=Math.round(n*.35),bushes=Math.round(n*.25),grass=n*4;
+  const T=new THREE.InstancedMesh(trunkG,trunkM,trees),L=new THREE.InstancedMesh(leafG,leafM,trees*2),B=new THREE.InstancedMesh(bushG,bushM,bushes),G=new THREE.InstancedMesh(grassG,grassM,grass);
+  const m=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3(),p=new THREE.Vector3();
+  const spot=()=>{let x,z;do{x=(R()*2-1)*half;z=(R()*2-1)*half;}while(Math.hypot(x,z)<keep);return[x,z];};
+  for(let i=0;i<trees;i++){const[x,z]=spot(),h=4+R()*6,w=2+R()*2;
+    T.setMatrixAt(i,m.compose(p.set(x,h/2,z),q.identity(),s.set(1,h,1)));
+    L.setMatrixAt(i*2,m.compose(p.set(x,h+w*.6,z),q,s.set(w,w*1.6,w)));L.setMatrixAt(i*2+1,m.compose(p.set(x,h+w*1.4,z),q,s.set(w*.7,w*1.2,w*.7)));}
+  for(let i=0;i<bushes;i++){const[x,z]=spot(),w=.8+R()*1.4;B.setMatrixAt(i,m.compose(p.set(x,w*.5,z),q,s.set(w*1.3,w,w*1.3)));}
+  for(let i=0;i<grass;i++){const[x,z]=spot(),h=.4+R()*.8;q.setFromEuler(new THREE.Euler((R()-.5)*.4,0,(R()-.5)*.4));G.setMatrixAt(i,m.compose(p.set(x,h/2,z),q,s.set(1,h,1)));}
+  q.identity();V.ground.add(T,L,B,G);
+}
+function resetView(){const d=V.f.size*1.8+4;V.cam.position.set(d*.8,V.f.height/2+d*.5,d*.9);V.ctl.target.set(0,V.f.height/2,0);V.cam.far=Math.max(3000,d*20);V.cam.updateProjectionMatrix();V.ctl.update();}
+function show(model){
+  if(!V)initViewer();current=model;
+  $('vtitle').textContent=model.name;$('vinfo').textContent=`#${model.id} · ${model.parts.length} parts · ${model.kb} KB`;$('vdl').href='ToolboxModels/'+encodeURIComponent(model.file);
+  if(V.model)V.scene.remove(V.model);V.model=buildModel(model,$('oStuds').checked);V.f=frame(V.model);V.scene.add(V.model);
+  buildGround();$('viewer').classList.remove('hide');resetView();
+}
+$('vclose').onclick=()=>$('viewer').classList.add('hide');
+$('viewer').onclick=e=>{if(e.target.id==='viewer')$('viewer').classList.add('hide');};
+addEventListener('keydown',e=>{if(e.key==='Escape')$('viewer').classList.add('hide');});
+$('oGround').onchange=$('oFol').oninput=()=>V&&buildGround();
+$('oStuds').onchange=()=>current&&show(current);
+$('oReset').onclick=()=>V&&resetView();
+
+// ---------- model grid ----------
+const mg=$('mg'),q=$('q');
+fetch('models.json').then(r=>r.json()).then(data=>{
+  MODELS=data;
+  mg.innerHTML=data.map((m,i)=>`<div class="card m" data-i="${i}"><img class="thumb" alt="" data-i="${i}"><div class="id">#${m.id} · ${m.parts.length} parts</div><div class="n">${esc(m.name)}</div>
+    <div class="btns"><button class="btn">View 3D</button><a class="btn sec" href="ToolboxModels/${encodeURIComponent(m.file)}" download onclick="event.stopPropagation()">Download</a></div></div>`).join('');
+  mg.querySelectorAll('.card').forEach(c=>c.onclick=()=>show(MODELS[+c.dataset.i]));
+  const imgs=[...mg.querySelectorAll('img.thumb')];let k=0;
+  (function next(){if(k>=imgs.length)return;const im=imgs[k++];try{im.src=thumb(MODELS[+im.dataset.i]);}catch(e){}setTimeout(next,0);})();
+  const draw=()=>{const s=q.value.toLowerCase();let n=0;mg.querySelectorAll('.card').forEach(c=>{const m=MODELS[+c.dataset.i];const ok=(m.id+' '+m.name).toLowerCase().includes(s);c.classList.toggle('hide',!ok);n+=ok;});$('cnt').textContent=n+' of '+MODELS.length;};
+  q.oninput=draw;draw();
+}).catch(()=>{$('cnt').textContent='Could not load models.json';});
 </script></body></html>

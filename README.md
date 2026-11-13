@@ -36,3 +36,6 @@ The `ToolboxModels/` folder holds the 2004–05 Roblox toolbox models (.rbxm), f
 
 ## Places
 - `Places/Mobile.rbxl`: Mobile place file. Open it in Roblox Studio.
+
+## Web launcher
+https://jogresh7-ship-it.github.io/ROBLOX-2017/ lets you browse every model with a 3D thumbnail. Click a model to open an interactive 3D viewer with a grass baseplate, an adjustable foliage amount, studs and auto-rotate. `models.json` is generated from the .rbxm files by `python tools/build_models_json.py`. Re-run it after adding models.
