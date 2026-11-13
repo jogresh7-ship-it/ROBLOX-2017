@@ -62,13 +62,39 @@ nav button.on{color:var(--txt);border-color:var(--acc)}main{padding:22px 28px;ma
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 
-const ICONS=["RBLXSTUDIO","RCC","minecraft","pictures","roblox2006","roblox2012","roblox2016","roblox2017","roblox2019","roblox2022","roldblox"];
+const ICONS=["RBLXSTUDIO","RCC","roblox2006","roblox2012","roblox2016","roblox2017","roblox2019","roblox2022","roldblox"];
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const $=id=>document.getElementById(id);
 
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('hide',s.id!==b.dataset.t));});
 $('ig').innerHTML=ICONS.map(i=>`<div class="card ic"><img src="icons/${i}.ico" alt=""><div class="n">${i}</div><a class="btn" href="icons/${i}.ico" download>Download</a></div>`).join('');
+
+
+// ---------- read the real .rbxm (2005 XML) files ----------
+function prop(item,tag,names){const P=item.querySelector(':scope>Properties');if(!P)return null;
+  for(const e of P.getElementsByTagName(tag)){if(names.includes(e.getAttribute('name'))&&e.closest('Item')===item)return e;}return null;}
+const n=(e,t,d=0)=>{const c=e&&e.getElementsByTagName(t)[0];const v=c?parseFloat(c.textContent):NaN;return isNaN(v)?d:v;};
+function cfMat(e){if(!e)return new THREE.Matrix4();const v=["X","Y","Z","R00","R01","R02","R10","R11","R12","R20","R21","R22"].map(k=>n(e,k));
+  return new THREE.Matrix4().set(v[3],v[4],v[5],v[0], v[6],v[7],v[8],v[1], v[9],v[10],v[11],v[2], 0,0,0,1);}
+function parseRbxm(text){
+  const doc=new DOMParser().parseFromString(text,'text/xml');const parts=[];
+  const walk=(item,parent)=>{
+    const W=parent.clone().multiply(cfMat(prop(item,'CoordinateFrame',['CoordinateFrame','CFrame'])));
+    const cls=item.getAttribute('class');
+    if(cls==='Part'||cls==='TrussPart'){
+      const sz=prop(item,'Vector3',['size'])||prop(item,'Vector3',['Size']),col=prop(item,'Color3',['Color']);
+      const shape=[...(item.querySelector(':scope>Properties')?.getElementsByTagName('token')||[])].find(t=>t.getAttribute('name')==='shape');
+      const tr=prop(item,'float',['Transparency']),top=prop(item,'Complex',['Top']);
+      parts.push({m:W,s:[n(sz,'X',1),n(sz,'Y',1),n(sz,'Z',1)],c:col?[n(col,'R',.5),n(col,'G',.5),n(col,'B',.5)]:[.6,.6,.6],
+        sh:cls==='TrussPart'?'Truss':(shape?shape.textContent:'Block'),t:tr?parseFloat(tr.textContent)||0:0,
+        studs:!!top&&/Bumps/.test(top.getElementsByTagName('token')[0]?.textContent||'')});
+    }
+    for(const ch of item.children)if(ch.tagName==='Item')walk(ch,W);
+  };
+  for(const it of doc.documentElement.children)if(it.tagName==='Item')walk(it,new THREE.Matrix4());
+  return parts;
+}
 
 // ---------- shared scene building ----------
 function studTexture(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
@@ -80,7 +106,7 @@ const STUD=studTexture();
 function buildModel(model,studs){
   const grp=new THREE.Group();
   for(const p of model.parts){
-    const [x,y,z,r00,r01,r02,r10,r11,r12,r20,r21,r22]=p.cf,[sx,sy,sz]=p.s;
+    const [sx,sy,sz]=p.s;
     const col=new THREE.Color(p.c[0],p.c[1],p.c[2]);
     const mat=()=>new THREE.MeshLambertMaterial({color:col,transparent:p.t>0,opacity:1-p.t});
     let mesh;
@@ -92,8 +118,7 @@ function buildModel(model,studs){
       mesh=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mats);
       if(p.sh==='Truss')mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),new THREE.LineBasicMaterial({color:0x222222})));
     }
-    const m=new THREE.Matrix4().set(r00,r01,r02,x, r10,r11,r12,y, r20,r21,r22,z, 0,0,0,1);
-    mesh.matrixAutoUpdate=false;mesh.matrix.copy(m);
+    mesh.matrixAutoUpdate=false;mesh.matrix.copy(p.m);
     mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry,30),new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:.25})));
     grp.add(mesh);
   }
@@ -174,14 +199,15 @@ $('oReset').onclick=()=>V&&resetView();
 
 // ---------- model grid ----------
 const mg=$('mg'),q=$('q');
-fetch('models.json').then(r=>r.json()).then(data=>{
-  MODELS=data;
-  mg.innerHTML=data.map((m,i)=>`<div class="card m" data-i="${i}"><img class="thumb" alt="" data-i="${i}"><div class="id">#${m.id} · ${m.parts.length} parts</div><div class="n">${esc(m.name)}</div>
-    <div class="btns"><button class="btn">View 3D</button><a class="btn sec" href="ToolboxModels/${encodeURIComponent(m.file)}" download onclick="event.stopPropagation()">Download</a></div></div>`).join('');
-  mg.querySelectorAll('.card').forEach(c=>c.onclick=()=>show(MODELS[+c.dataset.i]));
-  const imgs=[...mg.querySelectorAll('img.thumb')];let k=0;
-  (function next(){if(k>=imgs.length)return;const im=imgs[k++];try{im.src=thumb(MODELS[+im.dataset.i]);}catch(e){}setTimeout(next,0);})();
-  const draw=()=>{const s=q.value.toLowerCase();let n=0;mg.querySelectorAll('.card').forEach(c=>{const m=MODELS[+c.dataset.i];const ok=(m.id+' '+m.name).toLowerCase().includes(s);c.classList.toggle('hide',!ok);n+=ok;});$('cnt').textContent=n+' of '+MODELS.length;};
-  q.oninput=draw;draw();
-}).catch(()=>{$('cnt').textContent='Could not load models.json';});
+const FILES=["770 Ball 4x4x4.rbxm", "771 Block 2x4x1.rbxm", "772 Block 2x4x1 no join.rbxm", "773 Block 2x4x1 hinged.rbxm", "774 Block 2x2x6.rbxm", "775 Block 4x8x1.rbxm", "776 Block 4x4x1 turntable.rbxm", "777 Ball 2x2x2.rbxm", "780 Vertical Motor - Controllable.rbxm", "781 Motorized Block Pair - Controllable.rbxm", "782 Motorized Block Pair - Controllable.rbxm", "783 Constant Velocity Motor Pair.rbxm", "784 Motorized Block - Controllable.rbxm", "788 Tree.rbxm", "789 Chassis.rbxm", "794 Dog.rbxm", "796 Skateboard.rbxm", "797 Skooter.rbxm", "801 Bouncy Chassis.rbxm", "802 Micro Chassis.rbxm", "805 Truck Chassis.rbxm", "807 Tank Chassis.rbxm", "808 The Hammer.rbxm", "809 Man on Scooter.rbxm", "810 Blue Figure on Scooter.rbxm", "813 Elevated Ramp.rbxm", "814 Tilted Ramp.rbxm", "818 Rotating Barrier.rbxm", "819 Push Through Barrier.rbxm", "820 100 Point Arch.rbxm", "825 House.rbxm", "826 Building.rbxm", "827 Chassis with Figure.rbxm", "828 Spasmotron.rbxm", "829 Wimpotron.rbxm", "830 Micro-troublemaker.rbxm", "832 Attacking Bug.rbxm", "833 Fleeing Bug.rbxm", "843 25 Point flag.rbxm", "851 Electron Canon - Mounted.rbxm", "852 Electron Cannon.rbxm", "853 Fragment Bomb.rbxm", "854 Crazy Railroad Gate.rbxm", "855 Spinner.rbxm", "856 Rotating Obstacle.rbxm", "857 Windmill Obstacle - Anchored.rbxm", "858 5 Second Jewel.rbxm", "859 Lose Game Beacon.rbxm", "860 Win Game Beacon.rbxm", "862 Man figure.rbxm", "863 Blue figure.rbxm", "864 Red Figure.rbxm"];
+MODELS=FILES.map(f=>{const m=f.match(/^(\d+)\s+(.*)\.rbxm$/);return{id:m[1],name:m[2],file:f,parts:[]};});
+mg.innerHTML=MODELS.map((m,i)=>`<div class="card m" data-i="${i}"><img class="thumb" alt="" data-i="${i}"><div class="id" id="pc${i}">#${m.id}</div><div class="n">${esc(m.name)}</div>
+  <div class="btns"><button class="btn">View 3D</button><a class="btn sec" href="ToolboxModels/${encodeURIComponent(m.file)}" download onclick="event.stopPropagation()">Download</a></div></div>`).join('');
+mg.querySelectorAll('.card').forEach(c=>c.onclick=()=>{const m=MODELS[+c.dataset.i];m.loaded?show(m):m.loading.then(()=>show(m));});
+const draw=()=>{const s=q.value.toLowerCase();let k=0;mg.querySelectorAll('.card').forEach(c=>{const m=MODELS[+c.dataset.i];const ok=(m.id+' '+m.name).toLowerCase().includes(s);c.classList.toggle('hide',!ok);k+=ok;});$('cnt').textContent=k+' of '+MODELS.length;};
+q.oninput=draw;draw();
+(async()=>{for(const [i,m] of MODELS.entries()){
+  m.loading=fetch('ToolboxModels/'+encodeURIComponent(m.file)).then(r=>r.text()).then(t=>{m.parts=parseRbxm(t);m.kb=(t.length/1024).toFixed(1);m.loaded=true;});
+  try{await m.loading;$('pc'+i).textContent=`#${m.id} · ${m.parts.length} parts`;mg.querySelector(`img[data-i="${i}"]`).src=thumb(m);}catch(e){$('pc'+i).textContent=`#${m.id} · could not read file`;}
+}})();
 </script></body></html>

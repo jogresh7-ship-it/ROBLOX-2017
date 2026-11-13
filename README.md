@@ -22,7 +22,7 @@ Edit `rohtmlconfig.json`. Changes are picked up live, with no restart needed.
 { "window": { "title": "ROBLOX", "icon": "roblox2017.ico" } }
 ```
 
-Available icons are in `icons/`: roblox2006, roblox2012, roblox2016, roblox2017, roblox2019, roblox2022, RBLXSTUDIO, RCC, and others.
+Available icons are in `icons/`: roblox2006, roblox2012, roblox2016, roblox2017, roblox2019, roblox2022 and RBLXSTUDIO, RCC, roldblox.
 
 ## Building an .exe (optional)
 ```
@@ -38,4 +38,4 @@ The `ToolboxModels/` folder holds the 2004–05 Roblox toolbox models (.rbxm), f
 - `Places/Mobile.rbxl`: Mobile place file. Open it in Roblox Studio.
 
 ## Web launcher
-https://jogresh7-ship-it.github.io/ROBLOX-2017/ lets you browse every model with a 3D thumbnail. Click a model to open an interactive 3D viewer with a grass baseplate, an adjustable foliage amount, studs and auto-rotate. `models.json` is generated from the .rbxm files by `python tools/build_models_json.py`. Re-run it after adding models.
+https://jogresh7-ship-it.github.io/ROBLOX-2017/ lets you browse every model with a 3D thumbnail. Click a model to open an interactive 3D viewer with a grass baseplate, an adjustable foliage amount, studs and auto-rotate. The viewer reads the original .rbxm files directly. To add a model, put it in `ToolboxModels/` and add its file name to the `FILES` list in `index.html`.
